@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wingman Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --soft-white: #F5F4F1;
+            --charcoal: #2A2A29;
+            --warm-gray: #D4D1CC;
+            --accent-blue: #5571A0;
+            --grid-line: rgba(42, 42, 41, 0.06);
+            --text-muted: rgba(42, 42, 41, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--soft-white);
+            color: var(--charcoal);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* ===== GRID PAPER BACKGROUND ===== */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ===== CROP MARKS ===== */
+        .crop-marks {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .crop-mark {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+        }
+
+        .crop-mark::before,
+        .crop-mark::after {
+            content: '';
+            position: absolute;
+            background: var(--charcoal);
+            opacity: 0.15;
+        }
+
+        .crop-mark.tl { top: 0; left: 0; }
+        .crop-mark.tr { top: 0; right: 0; }
+        .crop-mark.bl { bottom: 0; left: 0; }
+        .crop-mark.br { bottom: 0; right: 0; }
+
+        .crop-mark.tl::before, .crop-mark.bl::before { width: 1px; height: 20px; left: 0; }
+        .crop-mark.tl::after, .crop-mark.tr::after { width: 20px; height: 1px; top: 0; }
+        .crop-mark.tr::before, .crop-mark.br::before { width: 1px; height: 20px; right: 0; }
+        .crop-mark.bl::after, .crop-mark.br::after { width: 20px; height: 1px; bottom: 0; }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 40px;
+            border-bottom: 1px dotted var(--warm-gray);
+            margin-bottom: 80px;
+        }
+
+        .logo {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            text-decoration: none;
+            color: var(--charcoal);
+        }
+
+        .logo sup {
+            font-size: 9px;
+            color: var(--accent-blue);
+            margin-left: 2px;
+        }
+
+        .header-meta {
+            text-align: right;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .header-meta span {
+            display: block;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 80px;
+            margin-bottom: 120px;
+            min-height: 60vh;
+            align-items: start;
+        }
+
+        .hero-main h1 {
+            font-size: clamp(64px, 12vw, 140px);
+            font-weight: 500;
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-bottom: 60px;
+        }
+
+        .hero-main h1 sup {
+            font-size: 0.2em;
+            color: var(--accent-blue);
+            vertical-align: super;
+            margin-left: 4px;
+        }
+
+        .hero-annotations {
+            padding-top: 20px;
+            border-left: 1px dotted var(--warm-gray);
+            padding-left: 24px;
+        }
+
+        .annotation {
+            margin-bottom: 40px;
+        }
+
+        .annotation-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        .annotation-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== CAPABILITIES ROW ===== */
+        .capabilities-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            padding: 40px 0;
+            border-top: 1px dotted var(--warm-gray);
+            border-bottom: 1px dotted var(--warm-gray);
+            margin-bottom: 120px;
+        }
+
+        .cap-item {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .cap-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .cap-name {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            margin-bottom: 120px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--charcoal);
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .section-arrow {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* ===== THE DILEMMA ===== */
+        .dilemma-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+        }
+
+        .dilemma-block {
+            padding: 40px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--warm-gray);
+        }
+
+        .dilemma-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--accent-blue);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .dilemma-title {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 32px;
+            line-height: 1.3;
+        }
+
+        .dilemma-list {
+            list-style: none;
+        }
+
+        .dilemma-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 12px 0;
+            border-bottom: 1px dotted var(--warm-gray);
+            font-size: 15px;
+        }
+
+        .dilemma-list li:last-child {
+            border-bottom: none;
+            color: var(--accent-blue);
+            font-weight: 500;
+        }
+
+        .dilemma-answer {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .dilemma-list li:last-child .dilemma-answer {
+            color: var(--accent-blue);
+        }
+
+        /* ===== FULL STACK ===== */
+        .stack-intro {
+            max-width: 600px;
+            margin-bottom: 60px;
+        }
+
+        .stack-intro h2 {
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .stack-intro p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .stack-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--warm-gray);
+            border: 1px solid var(--warm-gray);
+        }
+
+        .stack-item {
+            background: var(--soft-white);
+            padding: 32px;
+        }
+
+        .stack-item:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        .stack-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .stack-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .stack-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== LOCATION ===== */
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .location-main h2 {
+            font-size: 36px;
+            font-weight: 500;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .location-main h2 sup {
+            font-size: 12px;
+            color: var(--accent-blue);
+        }
+
+        .location-main p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .location-points {
+            padding-left: 40px;
+            border-left: 1px dotted var(--warm-gray);
+        }
+
+        .location-point {
+            margin-bottom: 24px;
+        }
+
+        .location-point-num {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        .location-point-text {
+            font-size: 14px;
+        }
+
+        .location-point-text strong {
+            font-weight: 500;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            padding-top: 80px;
+            border-top: 1px solid var(--charcoal);
+        }
+
+        .footer-cta {
+            margin-bottom: 80px;
+        }
+
+        .footer-cta h2 {
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            margin-bottom: 32px;
+        }
+
+        .footer-cta h2 sup {
+            font-size: 0.25em;
+            color: var(--accent-blue);
+        }
+
+        .footer-email {
+            font-size: 18px;
+            color: var(--charcoal);
+            text-decoration: none;
+            border-bottom: 1px solid var(--charcoal);
+            padding-bottom: 4px;
+            transition: all 0.3s;
+        }
+
+        .footer-email:hover {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .footer-bottom {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            padding-top: 40px;
+            border-top: 1px dotted var(--warm-gray);
+        }
+
+        .footer-col-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .footer-col p,
+        .footer-col a {
+            font-size: 13px;
+            color: var(--charcoal);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .footer-col a:hover {
+            color: var(--accent-blue);
+        }
+
+        .footer-legal {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px dotted var(--warm-gray);
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* ===== INDEX MARKERS ===== */
+        .index-marker {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            z-index: 100;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .container { padding: 40px; }
+            .hero { grid-template-columns: 1fr; gap: 40px; }
+            .hero-annotations { border-left: none; padding-left: 0; border-top: 1px dotted var(--warm-gray); padding-top: 24px; display: flex; gap: 40px; }
+            .capabilities-row { grid-template-columns: repeat(2, 1fr); }
+            .dilemma-grid { grid-template-columns: 1fr; }
+            .stack-grid { grid-template-columns: repeat(2, 1fr); }
+            .location-grid { grid-template-columns: 1fr; }
+            .location-points { padding-left: 0; border-left: none; padding-top: 40px; border-top: 1px dotted var(--warm-gray); }
+            .footer-bottom { grid-template-columns: repeat(2, 1fr); }
+            .index-marker { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .capabilities-row { grid-template-columns: 1fr; }
+            .stack-grid { grid-template-columns: 1fr; }
+            .footer-bottom { grid-template-columns: 1fr; }
+            .footer-legal { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Grid Background -->
+    <div class="grid-bg"></div>
+
+    <!-- Crop Marks -->
+    <div class="crop-marks">
+        <div class="crop-mark tl"></div>
+        <div class="crop-mark tr"></div>
+        <div class="crop-mark bl"></div>
+        <div class="crop-mark br"></div>
+    </div>
+
+    <!-- Index Marker -->
+    <div class="index-marker">THE WINGMAN PROJECT — 2026</div>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo">The Wingman Project<sup>1</sup></a>
+            <div class="header-meta">
+                <span>Los Angeles, California</span>
+                <span>Full-Stack Brand Building</span>
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-main">
+                <h1>We<sup>1</sup> build<sup>2</sup><br>brands.<sup>3</sup></h1>
+            </div>
+            <div class="hero-annotations">
+                <div class="annotation">
+                    <div class="annotation-num">1</div>
+                    <div class="annotation-text">together</div>
+                </div>
+                <div class="annotation">
+                    <div class="annotation-num">2</div>
+                    <div class="annotation-text">from scratch</div>
+                </div>
+                <div class="annotation">
+                    <div class="annotation-num">3</div>
+                    <div class="annotation-text">that last</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Capabilities Row -->
+        <div class="capabilities-row">
+            <div class="cap-item">
+                <span class="cap-num">01</span>
+                <span class="cap-name">Strategy</span>
+            </div>
+            <div class="cap-item">
+                <span class="cap-num">02</span>
+                <span class="cap-name">Identity</span>
+            </div>
+            <div class="cap-item">
+                <span class="cap-num">03</span>
+                <span class="cap-name">Web</span>
+            </div>
+            <div class="cap-item">
+                <span class="cap-num">04</span>
+                <span class="cap-name">Motion</span>
+            </div>
+        </div>
+
+        <!-- The Dilemma Section -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">The Question</span>
+                <span class="section-arrow">→</span>
+            </div>
+            
+            <div class="dilemma-grid">
+                <div class="dilemma-block">
+                    <div class="dilemma-label">For Creators</div>
+                    <h3 class="dilemma-title">The Influencer's Dilemma</h3>
+                    <ul class="dilemma-list">
+                        <li>Web development? <span class="dilemma-answer">No.</span></li>
+                        <li>Brand strategy? <span class="dilemma-answer">No.</span></li>
+                        <li>Product manufacturing? <span class="dilemma-answer">No.</span></li>
+                        <li>Supply chain logistics? <span class="dilemma-answer">No.</span></li>
+                        <li>Being you? <span class="dilemma-answer">Yes.</span></li>
+                    </ul>
+                </div>
+                <div class="dilemma-block">
+                    <div class="dilemma-label">For Brands</div>
+                    <h3 class="dilemma-title">The Opportunity Cost</h3>
+                    <ul class="dilemma-list">
+                        <li>Coordinating agencies? <span class="dilemma-answer">No.</span></li>
+                        <li>Chasing deliverables? <span class="dilemma-answer">No.</span></li>
+                        <li>Managing timelines? <span class="dilemma-answer">No.</span></li>
+                        <li>Endless revisions? <span class="dilemma-answer">No.</span></li>
+                        <li>Building products? <span class="dilemma-answer">Yes.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Full Stack Section -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">Capabilities</span>
+                <span class="section-arrow">→</span>
+            </div>
+            
+            <div class="stack-intro">
+                <h2>Everything. Literally.</h2>
+                <p>Not an agency with a Rolodex of contractors. Every discipline in-house. One team, one vision, one standard.</p>
+            </div>
+
+            <div class="stack-grid">
+                <div class="stack-item">
+                    <div class="stack-num">001</div>
+                    <div class="stack-name">Brand Strategy</div>
+                    <div class="stack-desc">Positioning, audience, competitive landscape, architecture.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">002</div>
+                    <div class="stack-name">Visual Identity</div>
+                    <div class="stack-desc">Logo, color, typography, guidelines, templates.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">003</div>
+                    <div class="stack-name">Naming & Verbal</div>
+                    <div class="stack-desc">Brand name, tagline, voice, messaging.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">004</div>
+                    <div class="stack-name">Web & Digital</div>
+                    <div class="stack-desc">E-commerce, marketing sites, landing pages.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">005</div>
+                    <div class="stack-name">Photography</div>
+                    <div class="stack-desc">Product, lifestyle, campaign, art direction.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">006</div>
+                    <div class="stack-name">Video & Motion</div>
+                    <div class="stack-desc">Brand films, ads, social, animation.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">007</div>
+                    <div class="stack-name">Packaging Design</div>
+                    <div class="stack-desc">Structure, graphics, materials, production.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">008</div>
+                    <div class="stack-name">Product Development</div>
+                    <div class="stack-desc">Formulation, sourcing, manufacturing.</div>
+                </div>
+                <div class="stack-item">
+                    <div class="stack-num">009</div>
+                    <div class="stack-name">Fulfillment</div>
+                    <div class="stack-desc">Warehousing, shipping, inventory, returns.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location Section -->
+        <section class="section">
+            <div class="section-header">
+                <span class="section-title">Los Angeles</span>
+                <span class="section-arrow">→</span>
+            </div>
+            
+            <div class="location-grid">
+                <div class="location-main">
+                    <h2>World-class talent.<sup>1</sup><br>All in-house.<sup>2</sup></h2>
+                    <p>Every strategist, designer, developer, photographer, and producer works together in Los Angeles. One team, one standard, one obsession with getting it right.</p>
+                </div>
+                <div class="location-points">
+                    <div class="location-point">
+                        <div class="location-point-num">01</div>
+                        <div class="location-point-text"><strong>No subcontracting.</strong> Every discipline under one roof.</div>
+                    </div>
+                    <div class="location-point">
+                        <div class="location-point-num">02</div>
+                        <div class="location-point-text"><strong>Senior talent only.</strong> No juniors learning on your project.</div>
+                    </div>
+                    <div class="location-point">
+                        <div class="location-point-num">03</div>
+                        <div class="location-point-text"><strong>Direct collaboration.</strong> You talk to the people doing the work.</div>
+                    </div>
+                    <div class="location-point">
+                        <div class="location-point-num">04</div>
+                        <div class="location-point-text"><strong>Quality obsessed.</strong> We'd rather say no than do it wrong.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-cta">
+                <h2>Let's build.<sup>→</sup></h2>
+                <a href="mailto:hello@thewingmanproject.com" class="footer-email">hello@thewingmanproject.com</a>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-col">
+                    <div class="footer-col-title">Studio</div>
+                    <p>The Wingman Project</p>
+                    <p>Los Angeles, California</p>
+                </div>
+                <div class="footer-col">
+                    <div class="footer-col-title">Work With Us</div>
+                    <a href="mailto:hello@thewingmanproject.com">Start a Project</a>
+                    <a href="mailto:careers@thewingmanproject.com">Careers</a>
+                </div>
+                <div class="footer-col">
+                    <div class="footer-col-title">Connect</div>
+                    <a href="#">Instagram</a>
+                    <a href="#">LinkedIn</a>
+                    <a href="#">Twitter</a>
+                </div>
+                <div class="footer-col">
+                    <div class="footer-col-title">Index</div>
+                    <a href="#">001 — Capabilities</a>
+                    <a href="#">002 — Process</a>
+                    <a href="#">003 — Contact</a>
+                </div>
+            </div>
+
+            <div class="footer-legal">
+                <span>© 2026 The Wingman Project. All rights reserved.</span>
+                <span>Full-Stack Brand Building</span>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>
